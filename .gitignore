@@ -1,0 +1,5 @@
+/.env
+/.idea
+/start_server.bat
+/venv
+/__pycache__
