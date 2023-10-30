@@ -47,7 +47,7 @@ def gpt3_request(prompt):
     """
     # Craft the messages for the chat
     messages = [
-        {"role": "system", "content": "You are a skilled Python programmer. Generate the exact Python code necessary based on user requirements. Include no extra formatting for markup. Plain text is necessary."},
+        {"role": "system", "content": "You are a skilled Python programmer generating unit conversion functions. Generate the exact Python code necessary based on user requirements. Include no extra formatting for markup. Plain text is necessary."},
         {"role": "user", "content": prompt}
     ]
 

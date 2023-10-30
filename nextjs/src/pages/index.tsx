@@ -2,6 +2,62 @@ import React, { useState, useEffect } from 'react';
 import { Button, TextField, Typography, Box, Grid, CircularProgress } from '@mui/material';
 import axios from 'axios';
 
+interface ChatBubbleProps {
+  prompt: string;
+  functionName: string;
+  functionCode: string;
+  onClick: () => void;
+}
+
+const ChatBubble: React.FC<ChatBubbleProps> = ({ prompt, functionName, functionCode, onClick }) => {
+  return (
+    <Box
+      sx={{
+        backgroundColor: '#f5f5f5',
+        padding: '16px',
+        overflowX: 'auto',
+        fontSize: '0.875rem',
+        lineHeight: 1.43,
+        borderRadius: '20px',
+        fontFamily: "Consolas, 'Courier New', monospace",
+        cursor: 'pointer',
+        marginBottom: '10px',
+      }}
+      onClick={onClick}
+    >
+      <Typography variant="subtitle1" gutterBottom>
+        {functionName}
+      </Typography>
+
+
+        
+
+    </Box>
+  );
+};
+
+const ChatHistory: React.FC<{
+  chatHistory: { prompt: string; functionName: string; functionCode: string }[];
+  onClick: (index: number) => void;
+}> = ({ chatHistory, onClick }) => {
+  return (
+    <Box sx={{ marginTop: '20px' }}>
+      <Typography variant="subtitle1" gutterBottom>
+        Chat History:
+      </Typography>
+      {chatHistory.map((chat, index) => (
+        <ChatBubble
+          key={index}
+          prompt={chat.prompt}
+          functionName={chat.functionName}
+          functionCode={chat.functionCode}
+          onClick={() => onClick(index)}
+        />
+      ))}
+    </Box>
+  );
+};
+
 const Converter: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -10,6 +66,7 @@ const Converter: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [functionCode, setFunctionCode] = useState('');
   const [functionName, setFunctionName] = useState('');
+  const [chatHistory, setChatHistory] = useState<{ prompt: string; functionName: string; functionCode: string }[]>([]);
 
   const handlePromptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPrompt(event.target.value);
@@ -23,7 +80,7 @@ const Converter: React.FC = () => {
     if (inputValue && isPromptSubmitted) {
       performConversion();
     }
-  }, [inputValue]); 
+  }, [inputValue]);
 
   const performConversion = async () => {
     try {
@@ -50,11 +107,19 @@ const Converter: React.FC = () => {
       setFunctionCode(output);
       setFunctionName(function_name);
       setIsPromptSubmitted(true);
+      setChatHistory([...chatHistory, { prompt, functionName: function_name, functionCode: output }]);
     } catch (error) {
       console.error('There was an error submitting the prompt', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleChatBubbleClick = (index: number) => {
+    const { prompt, functionName, functionCode } = chatHistory[index];
+    setPrompt(prompt);
+    setFunctionName(functionName);
+    setFunctionCode(functionCode);
   };
 
   return (
@@ -70,26 +135,14 @@ const Converter: React.FC = () => {
           onChange={handlePromptChange}
           sx={{ flex: '1', marginRight: '20px' }}
         />
-        <Button 
-          variant="contained" 
-          color="primary" 
-          onClick={submitPrompt} 
-          disabled={!prompt || isLoading}
-          size="large"
-        >
+        <Button variant="contained" color="primary" onClick={submitPrompt} disabled={!prompt || isLoading} size="large">
           {isLoading ? <CircularProgress size={24} /> : 'Submit Prompt'}
         </Button>
       </Box>
       {isPromptSubmitted && (
         <Grid container spacing={2} alignItems="center" justifyContent="center">
           <Grid item xs={6}>
-            <TextField
-              fullWidth
-              label="Input"
-              variant="outlined"
-              value={inputValue}
-              onChange={handleInputChange}
-            />
+            <TextField fullWidth label="Input" variant="outlined" value={inputValue} onChange={handleInputChange} />
           </Grid>
           <Grid item xs={6}>
             <TextField
@@ -118,7 +171,7 @@ const Converter: React.FC = () => {
               overflowX: 'auto',
               fontSize: '0.875rem',
               lineHeight: 1.43,
-              borderRadius: '4px',
+              borderRadius: '20px',
               fontFamily: "Consolas, 'Courier New', monospace",
             }}
           >
@@ -126,6 +179,7 @@ const Converter: React.FC = () => {
           </Box>
         </Box>
       )}
+      <ChatHistory chatHistory={chatHistory} onClick={handleChatBubbleClick} />
     </Box>
   );
 };
