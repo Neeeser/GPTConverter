@@ -6,7 +6,7 @@ import openai
 from dotenv import load_dotenv
 import os
 
-from main import gpt3_request, post_process_gpt3_text
+from tools import gpt3_request, post_process_gpt3_text
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")

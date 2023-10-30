@@ -63,7 +63,7 @@ def gpt3_request(prompt):
 
     return code.strip()  # strip() is used to remove leading/trailing white spaces
 
-def main():
+def cli():
     # Authenticate with the OpenAI API
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -107,4 +107,4 @@ def main():
 
 if __name__ == "__main__":
     while True:
-        main()
+        cli()

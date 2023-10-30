@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button, TextField, Typography, Box, Grid, CircularProgress } from '@mui/material';
 import axios from 'axios';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vs, stackoverflow, ghcolors, prism } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+
 
 interface ChatBubbleProps {
   prompt: string;
@@ -28,10 +31,6 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ prompt, functionName, functionC
       <Typography variant="subtitle1" gutterBottom>
         {functionName}
       </Typography>
-
-
-        
-
     </Box>
   );
 };
@@ -162,21 +161,20 @@ const Converter: React.FC = () => {
           <Typography variant="subtitle1" gutterBottom>
             Generated Function:
           </Typography>
-          <Typography variant="body1">{functionName}</Typography>
-          <Box
-            component="pre"
-            sx={{
-              backgroundColor: '#f5f5f5',
-              padding: '16px',
+          <SyntaxHighlighter
+            language="python"
+            style={prism}
+            customStyle={{
+              margin: '0 auto', backgroundColor: '#f5f5f5', padding: '16px',
               overflowX: 'auto',
               fontSize: '0.875rem',
               lineHeight: 1.43,
-              borderRadius: '20px',
-              fontFamily: "Consolas, 'Courier New', monospace",
+              borderRadius: '20px', borderColor: '#f5f5f5',
             }}
           >
             {functionCode}
-          </Box>
+          </SyntaxHighlighter>
+
         </Box>
       )}
       <ChatHistory chatHistory={chatHistory} onClick={handleChatBubbleClick} />
