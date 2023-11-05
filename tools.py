@@ -71,10 +71,9 @@ def gpt3_request_python(prompt):
     """
     # Craft the messages for the chat
 
-    j = json.load(open("prompt.json"))
-    sysprompt = j["SystemPrompt"]
+
     messages = [
-        {"role": "system", "content": sysprompt},
+        {"role": "system", "content": "You are a skilled Python programmer generating unit conversion functions. Generate the exact Python code necessary based on user requirements. Include no extra formatting for markup. Plain text is necessary."},
         {"role": "user", "content": prompt}
     ]
 
@@ -101,8 +100,10 @@ def gpt3_request_tsx(prompt):
     str: The GPT-3.5-turbo-generated code.
     """
     # Craft the messages for the chat
+    j = json.load(open("prompt.json"))
+    sysprompt = j["SystemPrompt"]
     messages = [
-        {"role": "system", "content": "You are a skilled typescript programmer generating unit conversion functions. Generate the exact typescript code necessary based on user requirements. Include no extraneous text just the code that was requested. "},
+        {"role": "system", "content": sysprompt}
         {"role": "user", "content": prompt}
     ]
 
