@@ -63,7 +63,7 @@ def create_convert_page():
 
     # Save the code to a file
     file_name = 'convert.tsx'
-    with open('src/pages/' + file_name, 'w+') as f:
+    with open('nextjs/src/pages/' + file_name, 'w+') as f:
         f.write(code)
 
     return jsonify({'file_name': file_name})
