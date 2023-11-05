@@ -103,7 +103,7 @@ def gpt3_request_tsx(prompt):
     j = json.load(open("prompt.json"))
     sysprompt = j["SystemPrompt"]
     messages = [
-        {"role": "system", "content": sysprompt}
+        {"role": "system", "content": sysprompt},
         {"role": "user", "content": prompt}
     ]
 
