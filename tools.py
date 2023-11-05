@@ -6,7 +6,8 @@ import sys
 from dotenv import load_dotenv
 import os
 load_dotenv()
-def post_process_gpt3_text(gpt3_text):
+
+def post_process_gpt3_text_python(gpt3_text):
     """
     Post-process the text from GPT-3: extract Python code, clean it up, and identify the function name.
 
@@ -35,7 +36,7 @@ def post_process_gpt3_text(gpt3_text):
 
     return clean_code, function_name
 
-def gpt3_request(prompt):
+def gpt3_request_python(prompt):
     """
     Make a request to the GPT-3.5-turbo API with a specific prompt.
 
@@ -63,6 +64,34 @@ def gpt3_request(prompt):
 
     return code.strip()  # strip() is used to remove leading/trailing white spaces
 
+def gpt3_request_tsx(prompt):
+    """
+    Make a request to the GPT-3.5-turbo API with a specific prompt.
+
+    Args:
+    prompt (str): The prompt describing the function.
+
+    Returns:
+    str: The GPT-3.5-turbo-generated code.
+    """
+    # Craft the messages for the chat
+    messages = [
+        {"role": "system", "content": "You are a skilled typescript programmer generating unit conversion functions. Generate the exact typescript code necessary based on user requirements. Include no extraneous text just the code that was requested."},
+        {"role": "user", "content": prompt}
+    ]
+
+    # Make the API request
+    response = openai.ChatCompletion.create(
+      model="gpt-3.5-turbo",
+      messages=messages,
+      temperature=0.5  # Lower temperature might help in getting more deterministic output
+    )
+
+    # Extract the code from the response
+    code = response['choices'][0]['message']['content']
+
+    return code.strip()  # strip() is used to remove leading/trailing white spaces
+
 def cli():
     # Authenticate with the OpenAI API
     openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -74,11 +103,11 @@ def cli():
     # Create a prompt for GPT-3
     prompt = f"Please provide the exact Python code for a function that {description}. The function should take one parameter as input and return the converted value. No additional text is necessary; only provide the complete Python function."
     # Get the function code from GPT-3
-    raw_code = gpt3_request(prompt)
+    raw_code = gpt3_request_python(prompt)
 
     try:
         # Post-process the received code to extract the actual function code and name
-        code, function_name = post_process_gpt3_text(raw_code)
+        code, function_name = post_process_gpt3_text_python(raw_code)
     except ValueError as e:
         print(f"Error in processing GPT-3 response: {str(e)}")
         sys.exit(1)
