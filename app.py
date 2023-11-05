@@ -6,7 +6,7 @@ import openai
 from dotenv import load_dotenv
 import os
 
-from tools import gpt3_request_python, post_process_gpt3_text_python
+from tools import gpt3_request_python, post_process_gpt3_text_python, gpt3_request_tsx, post_process_gpt3_text_tsx
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -40,20 +40,19 @@ def convert():
 
 @app.route('/api/create_convert_page', methods=['POST'])
 def create_convert_page():
-
     data = request.json
     prompt = data.get('prompt')
     print(f"Received prompt: {prompt}")
 
-
     # Create a prompt for GPT-3
-    prompt = f"Please provide the exact Python code for a function that {prompt}. The function should take one parameter as input and return the converted value. No additional text is necessary; only provide the complete Python function."
+    prompt = f"Please provide the exact TypeScript code for a basic webpage using Material UI that creates a nicely formatted page that converts {prompt} both ways. Include all the boxes in one row for the inputs needed. And all the boxes needed for output in one row."
+
     # Get the function code from GPT-3
-    raw_code = gpt3_request_python(prompt)
+    raw_code = gpt3_request_tsx(prompt)
 
     try:
         # Post-process the received code to extract the actual function code and name
-        code, function_name = post_process_gpt3_text_python(raw_code)
+        code = post_process_gpt3_text_tsx(raw_code)
     except ValueError as e:
         print(f"Error in processing GPT-3 response: {str(e)}")
         return jsonify({'output': f"Error in processing GPT-3 response: {str(e)}"})
@@ -62,7 +61,12 @@ def create_convert_page():
     print("\nGPT-3 generated the following code:\n")
     print(code)
 
-    return jsonify({'output': code, 'function_name': function_name})
+    # Save the code to a file
+    file_name = 'convert.tsx'
+    with open('src/pages/' + file_name, 'w') as f:
+        f.write(code)
+
+    return jsonify({'file_name': file_name})
 
 
 @app.route('/api/process-prompt', methods=['POST'])
@@ -95,4 +99,5 @@ def process_prompt():
 
 
 if __name__ == '__main__':
+
     app.run(port=5000)

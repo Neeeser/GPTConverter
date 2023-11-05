@@ -36,6 +36,29 @@ def post_process_gpt3_text_python(gpt3_text):
 
     return clean_code, function_name
 
+def post_process_gpt3_text_tsx(gpt3_text):
+    """
+    Post-process the text from GPT-3: extract Python code, clean it up, and identify the function name.
+
+    Args:
+    gpt3_text (str): The raw text received from GPT-3.
+
+    Returns:
+    tuple: A tuple containing two elements: the cleaned Python code as a string, and the function name.
+    """
+    # 1. Check if the text is in a code block and extract it
+    code_match = re.search(r'```typescript(.*?)```', gpt3_text, re.DOTALL)
+    if code_match:
+        code_block = code_match.group(1).strip()  # Extract the code and trim whitespace
+    else:
+        code_block = gpt3_text.strip()  # If not in a code block, consider the whole text as code
+
+    # 2. Clean up the code: remove any extraneous text outside of the main function definition
+    # This regex pattern matches 'def' followed by anything (non-greedy), then a set of parentheses (with anything inside), and a colon
+    # It captures the function name and the rest of the code block
+
+    return code_block
+
 def gpt3_request_python(prompt):
     """
     Make a request to the GPT-3.5-turbo API with a specific prompt.
