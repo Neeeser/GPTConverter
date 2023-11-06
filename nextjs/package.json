@@ -4,7 +4,6 @@
   "email": "hi@maccarianagency.com",
   "version": "5.0.0",
   "private": true,
-  
   "scripts": {
     "dev": "set NODE_OPTIONS=--inspect & next dev",
     "build": "next build",
@@ -36,11 +35,11 @@
   },
   "dependencies": {
     "@emotion/cache": "^11.10.7",
-    "@emotion/react": "^11.10.6",
+    "@emotion/react": "^11.11.1",
     "@emotion/server": "^11.10.0",
-    "@emotion/styled": "^11.10.6",
+    "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.12.0",
+    "@mui/material": "^5.14.16",
     "aos": "^2.3.4",
     "axios": "^1.6.0",
     "card-validator": "^8.1.1",
@@ -56,6 +55,7 @@
     "react": "^18.2.0",
     "react-countup": "^6.4.2",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.18.0",
     "react-slick": "^0.29.0",
     "react-syntax-highlighter": "^15.5.0",
     "react-visibility-sensor": "^5.1.1",

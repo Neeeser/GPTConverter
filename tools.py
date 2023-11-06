@@ -101,7 +101,8 @@ def gpt3_request_tsx(prompt):
     """
     # Craft the messages for the chat
     j = json.load(open("prompt.json"))
-    sysprompt = j["SystemPrompt"]
+    sysprompt = j["SystemPromptExample"]
+    print(sysprompt)
     messages = [
         {"role": "system", "content": sysprompt},
         {"role": "user", "content": prompt}

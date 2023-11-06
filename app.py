@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import hashlib
 
 import openai
 
@@ -45,28 +46,44 @@ def create_convert_page():
     print(f"Received prompt: {prompt}")
 
     # Create a prompt for GPT-3
-    prompt = f"Please provide the exact TypeScript code for a basic webpage using Material UI that creates a nicely formatted page that converts {prompt} both ways. Include all the boxes in one row for the inputs needed. And all the boxes needed for output in one row."
+    prompt = f"Please provide the exact TypeScript code for a basic webpage using Material UI that creates a nicely formatted page that converts {prompt} both ways."
+    return create_page(prompt)
 
-    # Get the function code from GPT-3
-    raw_code = gpt3_request_tsx(prompt)
+@app.route('/api/clear_history', methods=['POST'])
+def clear_history():
+    directory = 'nextjs/src/pages/convert_pages/'
+    errors = []
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                # If you also want to remove subdirectories, uncomment the next line
+                # shutil.rmtree(file_path)
+                pass  # Currently does nothing, directories are skipped
+        except Exception as e:
+            errors.append(f'Failed to delete {file_path}. Reason: {e}')
 
-    try:
-        # Post-process the received code to extract the actual function code and name
-        code = post_process_gpt3_text_tsx(raw_code)
-    except ValueError as e:
-        print(f"Error in processing GPT-3 response: {str(e)}")
-        return jsonify({'output': f"Error in processing GPT-3 response: {str(e)}"})
+    if not errors:
+        return jsonify({"success": True, "message": "History cleared successfully"}), 200
+    else:
+        # Return the first error encountered for simplicity, or you can return all errors.
+        return jsonify({"success": False, "message": errors[0]}), 500
 
-    # Print out the function code
-    print("\nGPT-3 generated the following code:\n")
-    print(code)
+@app.route('/api/create_unit_conversion_page', methods=['POST'])
+def create_unit_conversion_page():
+    data = request.json
+    unit1 = data.get('unit1')
+    unit2 = data.get('unit2')
 
-    # Save the code to a file
-    file_name = 'convert.tsx'
-    with open('nextjs/src/pages/' + file_name, 'w+') as f:
-        f.write(code)
+    prompt = unit1 + " to " + unit2
+    print(f"Received prompt: {prompt}")
 
-    return jsonify({'file_name': file_name})
+    # Create a prompt for GPT-3
+    prompt = f"Please provide the exact TypeScript code for a basic webpage using Material UI that creates a nicely formatted page that converts {prompt} both ways."
+
+    return create_page(prompt)
 
 
 @app.route('/api/process-prompt', methods=['POST'])
@@ -96,7 +113,37 @@ def process_prompt():
     return jsonify({'output': code, 'function_name': function_name})
 
 
+def create_page(prompt):
 
+    # Get the function code from GPT-3
+    raw_code = gpt3_request_tsx(prompt)
+
+    try:
+        # Post-process the received code to extract the actual function code and name
+        code = post_process_gpt3_text_tsx(raw_code)
+    except ValueError as e:
+        print(f"Error in processing GPT-3 response: {str(e)}")
+        return jsonify({'output': f"Error in processing GPT-3 response: {str(e)}"})
+
+    # Print out the function code
+    print("\nGPT-3 generated the following code:\n")
+    print(code)
+
+    # Save the code to a file
+    file_name = 'convert.tsx'
+
+
+    prompt_hash = hashlib.md5(prompt.encode()).hexdigest()
+    file_name = f"convert_{prompt_hash}.tsx"
+
+    with open('nextjs/src/pages/convert_pages/' + file_name, 'w+') as f:
+        f.write(code)
+
+    # remove the .tsx from file_name
+    file_name = file_name[:-4]
+
+
+    return jsonify({'file_name': file_name})
 
 if __name__ == '__main__':
 
