@@ -46,7 +46,6 @@ def create_convert_page():
     print(f"Received prompt: {prompt}")
 
     # Create a prompt for GPT-3
-    prompt = f"Please provide the exact TypeScript code for a basic webpage using Material UI that creates a nicely formatted page that converts {prompt} both ways."
     return create_page(prompt)
 
 @app.route('/api/clear_history', methods=['POST'])
@@ -80,9 +79,6 @@ def create_unit_conversion_page():
     prompt = unit1 + " to " + unit2
     print(f"Received prompt: {prompt}")
 
-    # Create a prompt for GPT-3
-    prompt = f"Please provide the exact TypeScript code for a basic webpage using Material UI that creates a nicely formatted page that converts {prompt} both ways."
-
     return create_page(prompt)
 
 
@@ -115,6 +111,9 @@ def process_prompt():
 
 def create_page(prompt):
 
+
+    prompt = f"Please provide the exact TypeScript code for a basic webpage using Material UI that creates a nicely formatted page that converts {prompt} both ways. Only allow the correct unit type to be entered in the input boxes."
+
     # Get the function code from GPT-3
     raw_code = gpt3_request_tsx(prompt)
 
@@ -143,7 +142,7 @@ def create_page(prompt):
     file_name = file_name[:-4]
 
 
-    return jsonify({'file_name': file_name})
+    return jsonify({'file_name': "convert_pages/"+file_name})
 
 if __name__ == '__main__':
 
