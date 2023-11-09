@@ -1,3 +1,4 @@
+import hashlib
 import re
 
 import openai
@@ -5,6 +6,7 @@ import sys
 import json
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 
 def post_process_gpt3_text_python(gpt3_text):
@@ -119,49 +121,37 @@ def gpt3_request_tsx(prompt):
     code = response['choices'][0]['message']['content']
 
     return code.strip()  # strip() is used to remove leading/trailing white spaces
+def create_page(prompt):
 
-def cli():
-    # Authenticate with the OpenAI API
-    openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    # Get the function description from the user
-    print("Describe the function you'd like to create (e.g., 'a function that converts kilometers to miles'):")
-    description = input("> ")
+    prompt = f"Please provide the exact TypeScript code for a basic webpage using Material UI that creates a nicely formatted page that converts {prompt} both ways. Only allow the correct unit type to be entered in the input boxes."
 
-    # Create a prompt for GPT-3
-    prompt = f"Please provide the exact Python code for a function that {description}. The function should take one parameter as input and return the converted value. No additional text is necessary; only provide the complete Python function."
     # Get the function code from GPT-3
-    raw_code = gpt3_request_python(prompt)
+    raw_code = gpt3_request_tsx(prompt)
 
     try:
         # Post-process the received code to extract the actual function code and name
-        code, function_name = post_process_gpt3_text_python(raw_code)
+        code = post_process_gpt3_text_tsx(raw_code)
     except ValueError as e:
         print(f"Error in processing GPT-3 response: {str(e)}")
-        sys.exit(1)
+        return {'output': f"Error in processing GPT-3 response: {str(e)}"}
 
     # Print out the function code
     print("\nGPT-3 generated the following code:\n")
     print(code)
 
-    # Dynamically define the function in the current script
-    exec_globals = {}
-    exec(code, exec_globals)
+    # Save the code to a file
+    file_name = 'convert.tsx'
 
-    # Retrieve the function using the extracted name
-    generated_function = exec_globals.get(function_name)
-    if not generated_function:
-        print("\nError: The generated code does not define a valid function. Please check the generated code.")
-        sys.exit(1)
 
-    # Get the value to convert from the user
-    print("\nEnter the value to convert:")
-    value = float(input("> "))
+    prompt_hash = hashlib.md5(prompt.encode()).hexdigest()
+    file_name = f"convert_{prompt_hash}.tsx"
 
-    # Call the generated function and print the result
-    result = generated_function(value)
-    print(f"\nResult: {result}")
+    with open('nextjs/src/pages/convert_pages/' + file_name, 'w+') as f:
+        f.write(code)
 
-if __name__ == "__main__":
-    while True:
-        cli()
+    # remove the .tsx from file_name
+    file_name = file_name[:-4]
+
+
+    return {'file_name': "convert_pages/"+file_name}
