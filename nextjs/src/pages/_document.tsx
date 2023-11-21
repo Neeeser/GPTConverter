@@ -31,11 +31,11 @@ export default class MyDocument extends Document {
           />
           <meta
             property="og:title"
-            content="theFront | UI Kit by Maccarian Agency."
+            content="GPT Converter"
           />
           <meta
             property="og:description"
-            content="A modern design system for your new landing and web pages."
+            content="Create webpages from prompts"
           />
           <meta
             property="og:url"

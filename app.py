@@ -9,12 +9,11 @@ import os
 
 from tools import gpt3_request_python, post_process_gpt3_text_python, gpt3_request_tsx, post_process_gpt3_text_tsx
 
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+#openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__)
-CORS(app)  # This will enable CORS for all routes, for all origins and methods.
 
+#CORS(app)  # This will enable CORS for all routes, for all origins and methods.
 
 @app.route('/api/convert', methods=['POST'])
 def convert():
@@ -76,7 +75,7 @@ def create_unit_conversion_page():
     unit1 = data.get('unit1')
     unit2 = data.get('unit2')
 
-    prompt = unit1 + " to " + unit2
+    prompt = unit1 + " to " + unit2 + " conversion make the conversion both ways"
     print(f"Received prompt: {prompt}")
 
     return create_page(prompt)
@@ -103,8 +102,8 @@ def process_prompt():
         return jsonify({'output': f"Error in processing GPT-3 response: {str(e)}"})
 
     # Print out the function code
-    print("\nGPT-3 generated the following code:\n")
-    print(code)
+    # print("\nGPT-3 generated the following code:\n")
+    # print(code)
 
     return jsonify({'output': code, 'function_name': function_name})
 
@@ -112,7 +111,7 @@ def process_prompt():
 def create_page(prompt):
 
 
-    prompt = f"Please provide the exact TypeScript code for a basic webpage using Material UI that creates a nicely formatted page that converts {prompt} both ways. Only allow the correct unit type to be entered in the input boxes."
+    prompt = f"Please provide the exact TypeScript code for a webpage using solve this input: {prompt}. Provide the complete code with all functionality."
 
     # Get the function code from GPT-3
     raw_code = gpt3_request_tsx(prompt)
@@ -125,8 +124,8 @@ def create_page(prompt):
         return jsonify({'output': f"Error in processing GPT-3 response: {str(e)}"})
 
     # Print out the function code
-    print("\nGPT-3 generated the following code:\n")
-    print(code)
+    # print("\nGPT-3 generated the following code:\n")
+    # print(code)
 
     # Save the code to a file
     file_name = 'convert.tsx'
@@ -144,6 +143,33 @@ def create_page(prompt):
 
     return jsonify({'file_name': "convert_pages/"+file_name})
 
+
+@app.route('/api/get_file_content/<path:filename>', methods=['GET'])
+def get_file_content(filename):
+    try:
+        with open(f'nextjs/src/pages/{filename}.tsx', 'r') as file:
+            content = file.read()
+        return jsonify({'content': content}), 200
+    except Exception as e:
+        return jsonify({'error': f'Error reading file: {str(e)}'}), 500
+
+@app.route('/api/save_file_content/<path:filename>', methods=['POST'])
+def save_file_content(filename):
+    data = request.json
+    content = data.get('content')
+    try:
+        with open(f'nextjs/src/pages/{filename}.tsx', 'w') as file:
+            file.write(content)
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': f'Error writing to file: {str(e)}'}), 500
+
+
 if __name__ == '__main__':
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})  # Replace with your React app's serving URL
+    load_dotenv()
+    openai.api_key = os.getenv("OPENAI_API_KEY")
 
     app.run(port=5000)
+
+

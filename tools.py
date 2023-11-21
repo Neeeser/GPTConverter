@@ -47,12 +47,13 @@ def post_process_gpt3_text_tsx(gpt3_text):
     tuple: A tuple containing two elements: the cleaned Python code as a string, and the function name.
     """
     # 1. Check if the text is in a code block and extract it
-    code_match = re.search(r'```typescript(.*?)```', gpt3_text, re.DOTALL)
+    code_match = re.search(r'```(?:typescript|tsx|ts)\s*(.*?)```', gpt3_text, re.DOTALL | re.IGNORECASE)
+
     if code_match:
         code_block = code_match.group(1).strip()  # Extract the code and trim whitespace
     else:
-        code_block = gpt3_text.strip()  # If not in a code block, consider the whole text as code
-
+        #code_block = gpt3_text.strip()  # If not in a code block, consider the whole text as code
+        raise ValueError("No valid TypeScript code block found.")
     # 2. Clean up the code: remove any extraneous text outside of the main function definition
     # This regex pattern matches 'def' followed by anything (non-greedy), then a set of parentheses (with anything inside), and a colon
     # It captures the function name and the rest of the code block
@@ -79,9 +80,10 @@ def gpt3_request_python(prompt):
 
     # Make the API request
     response = openai.ChatCompletion.create(
-      model="gpt-3.5-turbo",
+      # GPT 4
+      model="gpt-3.5-turbo-1106",
       messages=messages,
-      temperature=0.5  # Lower temperature might help in getting more deterministic output
+      #temperature=0.5  # Lower temperature might help in getting more deterministic output
     )
 
     # Extract the code from the response
@@ -110,11 +112,13 @@ def gpt3_request_tsx(prompt):
 
     # Make the API request
     response = openai.ChatCompletion.create(
-      model="gpt-3.5-turbo",
+      model="gpt-3.5-turbo-1106",
       messages=messages,
       temperature=0.5  # Lower temperature might help in getting more deterministic output
     )
 
+    # Print full message
+    print(response)
     # Extract the code from the response
     code = response['choices'][0]['message']['content']
 
