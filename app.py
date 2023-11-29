@@ -166,10 +166,11 @@ def save_file_content(filename):
 
 
 if __name__ == '__main__':
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})  # Replace with your React app's serving URL
+    CORS(app, resources={r"/api/*": {"origins": "*"}})  # You can limit origins as needed for security
     load_dotenv()
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    app.run(port=5000)
+    # Bind to 0.0.0.0 to make the server accessible externally
+    app.run(host='0.0.0.0', port=5000)
 
 

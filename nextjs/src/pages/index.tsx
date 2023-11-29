@@ -49,7 +49,7 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
     setAnchorEl(event.currentTarget);
     setEditorOpen(true);
     try {
-      const response = await axios.get(`http://localhost:5000/api/get_file_content/${pageLink}`);
+      const response = await axios.get(`https://sitegen.cs.vt.edu/api/get_file_content/${pageLink}`);
       setFileContent(response.data.content);
     } catch (error) {
       console.error('Error fetching file content', error);
@@ -67,7 +67,7 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
 
   const handleSave = async () => {
     try {
-      await axios.post(`http://localhost:5000/api/save_file_content/${pageLink}`, { content: fileContent });
+      await axios.post(`https://sitegen.cs.vt.edu/api/save_file_content/${pageLink}`, { content: fileContent });
       alert('File saved successfully');
       if (addToPrompt && onAppendToPrompt) {
         onAppendToPrompt(fileContent);
@@ -194,7 +194,7 @@ const CreateConvertPage: React.FC = () => {
       const endpoint = unit1 && unit2 ? '/api/create_unit_conversion_page' : '/api/create_convert_page';
       const data = unit1 && unit2 ? { unit1, unit2 } : { prompt: combinedPrompt };
 
-      const response = await axios.post(`http://localhost:5000${endpoint}`, data);
+      const response = await axios.post(`https://sitegen.cs.vt.edu${endpoint}`, data);
       const newHistoryItem: HistoryItemProps = {
         unit1: unit1, // or just unit1 if using shorthand property names
         unit2: unit2,
@@ -226,7 +226,7 @@ const CreateConvertPage: React.FC = () => {
     setHistory([]);
     localStorage.removeItem('history');
     try {
-      await axios.post('http://localhost:5000/api/clear_history');
+      await axios.post('https://sitegen.cs.vt.edu/api/clear_history');
     } catch (error) {
       console.error('There was an error clearing the history', error);
     }
