@@ -4,6 +4,7 @@ export interface HistoryItemProps {
     unit1?: string;
     unit2?: string;
     prompt?: string;
+    model?: string;
     pageLink: string;
     onAppendToPrompt?: (content: string) => void;
     addToPrompt: boolean;

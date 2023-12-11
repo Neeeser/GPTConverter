@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import hashlib
@@ -7,7 +9,7 @@ import openai
 from dotenv import load_dotenv
 import os
 
-from tools import gpt3_request_python, post_process_gpt3_text_python, gpt3_request_tsx, post_process_gpt3_text_tsx
+from tools import gpt3_request_python, post_process_gpt3_text_python, gpt3_request_tsx, post_process_gpt3_text_tsx, make_request
 
 #openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -42,10 +44,16 @@ def convert():
 def create_convert_page():
     data = request.json
     prompt = data.get('prompt')
+    model = data.get('model')
+
     print(f"Received prompt: {prompt}")
 
+    j = json.load(open("prompt.json"))
+    general_input_prompt = j["GeneralInputPrompt"]
+    formatted_prompt = general_input_prompt.format(user_input=prompt)
+
     # Create a prompt for GPT-3
-    return create_page(prompt)
+    return create_page(formatted_prompt,model)
 
 @app.route('/api/clear_history', methods=['POST'])
 def clear_history():
@@ -74,11 +82,15 @@ def create_unit_conversion_page():
     data = request.json
     unit1 = data.get('unit1')
     unit2 = data.get('unit2')
-
+    model = data.get("model")
     prompt = unit1 + " to " + unit2 + " conversion make the conversion both ways"
     print(f"Received prompt: {prompt}")
 
-    return create_page(prompt)
+    j = json.load(open("prompt.json"))
+    unit_conversion_prompt = j["UnitConversionPrompt"]
+    formatted_prompt = unit_conversion_prompt.replace("{{USER_INPUT}}", prompt)
+
+    return create_page(formatted_prompt, model)
 
 
 @app.route('/api/process-prompt', methods=['POST'])
@@ -108,13 +120,11 @@ def process_prompt():
     return jsonify({'output': code, 'function_name': function_name})
 
 
-def create_page(prompt):
+def create_page(prompt, model):
 
-
-    prompt = f"Please provide the exact TypeScript code for a webpage using solve this input: {prompt}. Provide the complete code with all functionality."
 
     # Get the function code from GPT-3
-    raw_code = gpt3_request_tsx(prompt)
+    raw_code = make_request(prompt, model)
 
     try:
         # Post-process the received code to extract the actual function code and name
@@ -163,6 +173,19 @@ def save_file_content(filename):
         return jsonify({'success': True}), 200
     except Exception as e:
         return jsonify({'error': f'Error writing to file: {str(e)}'}), 500
+
+
+@app.route('/api/get_models', methods=['GET'])
+def get_models():
+    try:
+        with open('prompt.json', 'r') as file:
+            data = json.load(file)
+            models = data.get('models', [])
+            return jsonify({'models': models})
+    except FileNotFoundError:
+        return jsonify({'error': 'File not found'}), 404
+    except json.JSONDecodeError:
+        return jsonify({'error': 'Invalid JSON format'}), 400
 
 
 if __name__ == '__main__':

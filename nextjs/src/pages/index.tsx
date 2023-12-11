@@ -27,6 +27,28 @@ const CreateConvertPage: React.FC = () => {
   const [history, setHistory] = useState<HistoryItemProps[]>([]);
   const [inputType, setInputType] = useState('units');
 
+  const [model, setModel] = useState('GPT-3.5'); // Set default model here
+  const [modelOptions, setModelOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/get_models');
+        setModelOptions(response.data.models);
+
+        // Optional: Set the default model if it's in the response
+        if (response.data.models.includes('GPT-3.5')) {
+          setModel('GPT-3.5');
+        }
+      } catch (error) {
+        console.error('Error fetching models', error);
+      }
+    };
+
+    fetchModels();
+  }, []);
+
+
   useEffect(() => {
     const savedHistory = localStorage.getItem('history');
     if (savedHistory) {
@@ -51,7 +73,9 @@ const CreateConvertPage: React.FC = () => {
     setIsLoading(true);
     const combinedPrompt = `${prompt}\n\n${additionalContent}`;
     const endpoint = unit1 && unit2 ? '/api/create_unit_conversion_page' : '/api/create_convert_page';
-    const data = unit1 && unit2 ? { unit1, unit2 } : { prompt: combinedPrompt };
+
+    // Include the model in the data being sent
+    const data = unit1 && unit2 ? { unit1, unit2, model } : { prompt: combinedPrompt, model };
 
     try {
       const response = await axios.post(`http://localhost:5000${endpoint}`, data);
@@ -59,6 +83,7 @@ const CreateConvertPage: React.FC = () => {
         unit1,
         unit2,
         prompt,
+        model, // Store the model in the history as well, if needed
         pageLink: response.data.file_name,
         timestamp: Date.now(),
       };
@@ -68,12 +93,15 @@ const CreateConvertPage: React.FC = () => {
       setUnit2('');
       setPrompt('');
       setAdditionalContent('');
+      // Reset the model to default if needed, or leave as is if you want to keep the selection
+      // setModel('GPT-3.5');
     } catch (error) {
       console.error('Error creating the page', error);
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const handleClearHistory = async () => {
     setHistory([]);
@@ -91,19 +119,38 @@ const CreateConvertPage: React.FC = () => {
         Create Conversion Page
       </Typography>
 
-      <FormControl fullWidth sx={{ marginBottom: '20px' }}>
-        <InputLabel id="input-type-select-label">Input Type</InputLabel>
-        <Select
-          labelId="input-type-select-label"
-          id="input-type-select"
-          value={inputType}
-          label="Input Type"
-          onChange={(event) => setInputType(event.target.value as string)}
-        >
-          <MenuItem value="units">Units</MenuItem>
-          <MenuItem value="prompt">Prompt</MenuItem>
-        </Select>
-      </FormControl>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <FormControl fullWidth sx={{ marginRight: '10px' }}>
+          <InputLabel id="input-type-select-label">Input Type</InputLabel>
+          <Select
+            labelId="input-type-select-label"
+            id="input-type-select"
+            value={inputType}
+            label="Input Type"
+            onChange={(event) => setInputType(event.target.value as string)}
+          >
+            <MenuItem value="units">Units</MenuItem>
+            <MenuItem value="prompt">Prompt</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth sx={{ marginLeft: '10px' }}>
+          <InputLabel id="model-select-label">Model</InputLabel>
+          <Select
+            labelId="model-select-label"
+            id="model-select"
+            value={model}
+            label="Model"
+            onChange={(event) => setModel(event.target.value as string)}
+          >
+            {modelOptions.map((modelName) => (
+              <MenuItem key={modelName} value={modelName}>
+                {modelName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
 
       {inputType === 'units' && (
         <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -131,6 +178,7 @@ const CreateConvertPage: React.FC = () => {
       </Box>
     </Box>
   );
+
 };
 
 export default CreateConvertPage;

@@ -1,20 +1,9 @@
-// HistoryBubble.tsx
 import React, { useState, useEffect } from 'react';
 import MonacoEditor from '@monaco-editor/react';
-import {
-  Button,
-  Box,
-  Typography,
-  Popover,
-  Checkbox,
-  FormControlLabel,
-} from '@mui/material';
+import { Button, Box, Typography, Popover, Checkbox, FormControlLabel } from '@mui/material';
 import axios from 'axios';
 import Link from 'next/link';
-
-// In both HistoryBubble.tsx and index.tsx
-import { HistoryItemProps } from '../types/types'; // Adjust the path as necessary
-
+import { HistoryItemProps } from '../types/types'; // Ensure the path is correct
 
 const HistoryBubble: React.FC<HistoryItemProps> = ({
   unit1,
@@ -49,18 +38,12 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
   const handleClose = () => {
     setEditorOpen(false);
     setAnchorEl(null);
-    if (addToPrompt && onAppendToPrompt) {
-      onAppendToPrompt(fileContent);
-    }
   };
 
   const handleSave = async () => {
     try {
-      await axios.post(`http://localhost:5000/api/save_file_content/${pageLink}`, { content: fileContent });
+      const response = await axios.post(`http://localhost:5000/api/save_file_content/${pageLink}`, { content: fileContent });
       alert('File saved successfully');
-      if (addToPrompt && onAppendToPrompt) {
-        onAppendToPrompt(fileContent);
-      }
     } catch (error) {
       console.error('Error saving file', error);
     }
@@ -68,40 +51,47 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
-
   const displayText = unit1 && unit2 ? `Convert: ${unit1} to ${unit2}` : `Prompt: ${prompt}`;
 
   return (
-    <Box sx={{ marginBottom: '10px' }}>
+    <Box sx={{
+      marginBottom: '10px',
+      boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+      borderRadius: '10px',
+      overflow: 'hidden',
+    }}>
       <Link href={`/${pageLink}`} passHref>
-        <Button
-          sx={{
-            display: 'block',
-            width: '100%',
-            padding: '16px',
-            borderRadius: '20px',
-            textAlign: 'left',
-            boxShadow: 'none',
-            backgroundColor: '#f5f5f5',
-            color: 'black',
-            '&:hover': {
-              backgroundColor: '#e0e0e0',
-              boxShadow: 'none',
-            },
-            marginBottom: '5px',
-          }}
-        >
-          <Typography variant="subtitle1" component="div" gutterBottom>
+        <Button sx={{
+          display: 'block',
+          width: '100%',
+          padding: '16px',
+          textAlign: 'left',
+          backgroundColor: '#f5f5f5',
+          color: 'black',
+          '&:hover': {
+            backgroundColor: '#e0e0e0',
+          },
+          marginBottom: '5px',
+        }}>
+          <Typography variant="subtitle1" gutterBottom>
             {displayText}
-          </Typography>
-          <Typography variant="subtitle2" component="div">
-            Go to page: {pageLink}
           </Typography>
         </Button>
       </Link>
-      <Button size="small" onClick={handleEditorClick} sx={{ width: '100%' }}>
-        Edit File
-      </Button>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '0 16px 16px' }}>
+        <Button
+          size="small"
+          variant="outlined" // Added for Material UI button style
+          color="primary" // Added for Material UI button style
+          onClick={handleEditorClick}
+        >
+          Edit File
+        </Button>
+        <FormControlLabel
+          control={<Checkbox checked={addToPrompt} onChange={(e) => setAddToPrompt(e.target.checked)} />}
+          label="Apply to Prompt"
+        />
+      </Box>
       <Popover
         id={id}
         open={open}
@@ -120,20 +110,14 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
             value={fileContent}
             onChange={(value) => setFileContent(value || '')}
           />
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <FormControlLabel
-              control={<Checkbox checked={addToPrompt} onChange={(e) => setAddToPrompt(e.target.checked)} />}
-              label="Add to Prompt"
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSave}
-              sx={{ marginLeft: 'auto' }}
-            >
-              Save
-            </Button>
-          </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSave}
+            sx={{ marginTop: '10px', float: 'right' }}
+          >
+            Save
+          </Button>
         </Box>
       </Popover>
     </Box>

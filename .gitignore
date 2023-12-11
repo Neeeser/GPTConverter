@@ -3,3 +3,4 @@
 /start_server.bat
 /venv
 /__pycache__
+.DS_Store

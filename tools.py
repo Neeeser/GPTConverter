@@ -91,6 +91,14 @@ def gpt3_request_python(prompt):
 
     return code.strip()  # strip() is used to remove leading/trailing white spaces
 
+def make_request(prompt, model="gpt-3.5-turbo-1106"):
+    if model == "GPT-3.5":
+        return gpt3_request_tsx(prompt)
+    elif model == "GPT-4":
+        return gpt4_request_tsx(prompt)
+
+    return gpt3_request_tsx(prompt)
+
 def gpt3_request_tsx(prompt):
     """
     Make a request to the GPT-3.5-turbo API with a specific prompt.
@@ -103,7 +111,7 @@ def gpt3_request_tsx(prompt):
     """
     # Craft the messages for the chat
     j = json.load(open("prompt.json"))
-    sysprompt = j["SystemPromptExample"]
+    sysprompt = j["RefinedSystemPrompt3.5"]
     print(sysprompt)
     messages = [
         {"role": "system", "content": sysprompt},
@@ -123,6 +131,41 @@ def gpt3_request_tsx(prompt):
     code = response['choices'][0]['message']['content']
 
     return code.strip()  # strip() is used to remove leading/trailing white spaces
+
+
+def gpt4_request_tsx(prompt):
+    """
+    Make a request to the GPT-4-turbo API with a specific prompt.
+
+    Args:
+    prompt (str): The prompt describing the function.
+
+    Returns:
+    str: The GPT-4-turbo-generated code.
+    """
+    # Craft the messages for the chat
+    j = json.load(open("prompt.json"))
+    sysprompt = j["RefinedSystemPrompt"]
+    print(sysprompt)
+    messages = [
+        {"role": "system", "content": sysprompt},
+        {"role": "user", "content": prompt}
+    ]
+
+    # Make the API request
+    response = openai.ChatCompletion.create(
+      model="gpt-4-1106-preview",
+      messages=messages,
+      temperature=0.5  # Lower temperature might help in getting more deterministic output
+    )
+
+    # Print full message
+    print(response)
+    # Extract the code from the response
+    code = response['choices'][0]['message']['content']
+
+    return code.strip()  # strip() is used to remove leading/trailing white spaces
+
 
 def cli():
     # Authenticate with the OpenAI API
@@ -167,5 +210,12 @@ def cli():
     print(f"\nResult: {result}")
 
 if __name__ == "__main__":
-    while True:
-        cli()
+    # while True:
+    #     cli()
+    j = json.load(open("prompt.json"))
+    sysprompt = j["GeneralInputPrompt"]
+
+    user_input = "Create a compound interest calculator"  # Example user input
+    formatted_json = sysprompt.format(user_input=user_input)
+    print(formatted_json)
+
