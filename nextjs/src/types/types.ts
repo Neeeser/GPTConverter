@@ -6,6 +6,9 @@ export interface HistoryItemProps {
     prompt?: string;
     model?: string;
     pageLink: string;
+    isActive,
+    setActiveBubbleId,
+    applyToPromptDisabled, // Add this prop
     onAppendToPrompt?: (content: string) => void;
     addToPrompt: boolean;
     setAddToPrompt: React.Dispatch<React.SetStateAction<boolean>>;

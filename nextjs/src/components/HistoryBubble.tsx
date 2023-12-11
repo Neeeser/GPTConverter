@@ -5,10 +5,20 @@ import axios from 'axios';
 import Link from 'next/link';
 import { HistoryItemProps } from '../types/types'; // Ensure the path is correct
 
+// Add the new props in the HistoryItemProps type definition
+interface HistoryBubbleProps extends HistoryItemProps {
+  isActive: boolean;
+  setActiveBubbleId: () => void;
+}
+
 const HistoryBubble: React.FC<HistoryItemProps> = ({
   unit1,
   unit2,
   prompt,
+  model,
+  isActive,
+  setActiveBubbleId,
+  applyToPromptDisabled, // Add this prop
   pageLink,
   onAppendToPrompt,
   addToPrompt,
@@ -35,6 +45,18 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
     }
   };
 
+  // Adjust the checkbox onChange handler
+  const handleCheckboxChange = () => {
+    // Toggle the active state based on the current active state
+    if (isActive) {
+      setActiveBubbleId(null); // Uncheck and set to no active bubble
+    } else {
+      setActiveBubbleId(); // Check and set this bubble as active
+    }
+  };
+
+
+
   const handleClose = () => {
     setEditorOpen(false);
     setAnchorEl(null);
@@ -52,6 +74,7 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
   const displayText = unit1 && unit2 ? `Convert: ${unit1} to ${unit2}` : `Prompt: ${prompt}`;
+  const modelText = model ? `Model: ${model}` : '';
 
   return (
     <Box sx={{
@@ -78,17 +101,41 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
           </Typography>
         </Button>
       </Link>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '0 16px 16px' }}>
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '0 16px 16px',
+        '& > *': {
+          margin: 'auto', // This will center the elements
+        }
+      }}>
         <Button
           size="small"
-          variant="outlined" // Added for Material UI button style
-          color="primary" // Added for Material UI button style
+          variant="outlined"
+          color="primary"
           onClick={handleEditorClick}
         >
           Edit File
         </Button>
+        <Typography variant="subtitle2" sx={{
+          color: 'gray',
+          textAlign: 'center',
+          maxWidth: '100%',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}>
+          {modelText}
+        </Typography>
         <FormControlLabel
-          control={<Checkbox checked={addToPrompt} onChange={(e) => setAddToPrompt(e.target.checked)} />}
+          control={
+            <Checkbox
+              checked={isActive}
+              onChange={(e) => setActiveBubbleId(e.target.checked ? pageLink : null)}
+              disabled={applyToPromptDisabled} // Use the prop here
+            />
+          }
           label="Apply to Prompt"
         />
       </Box>
@@ -122,6 +169,6 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
       </Popover>
     </Box>
   );
-};
+}
 
 export default HistoryBubble;

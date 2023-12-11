@@ -26,9 +26,10 @@ const CreateConvertPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState<HistoryItemProps[]>([]);
   const [inputType, setInputType] = useState('units');
-
+  const [addToPrompt, setAddToPrompt] = useState(false);
   const [model, setModel] = useState('GPT-3.5'); // Set default model here
   const [modelOptions, setModelOptions] = useState<string[]>([]);
+  const [activeBubbleId, setActiveBubbleId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -69,9 +70,29 @@ const CreateConvertPage: React.FC = () => {
     setAdditionalContent(content);
   };
 
+  // Define the getFileContent method in the parent component
+  const getFileContent = async (pageLink: string) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/get_file_content/${pageLink}`);
+      return response.data.content; // Make sure this corresponds to how your API sends the file content
+    } catch (error) {
+      console.error('Error fetching file content', error);
+      return ''; // Return an empty string or handle the error as appropriate
+    }
+  };
+
+
   const handleSubmit = async () => {
     setIsLoading(true);
-    const combinedPrompt = `${prompt}\n\n${additionalContent}`;
+    let combinedPrompt = prompt;
+
+    /// Find the active HistoryBubble and get its content
+    const activeBubble = history.find(item => item.pageLink === activeBubbleId);
+    if (activeBubbleId) {
+      const activeBubbleContent = await getFileContent(activeBubbleId);
+      combinedPrompt += `\n\n${activeBubbleContent}`;
+    }
+
     const endpoint = unit1 && unit2 ? '/api/create_unit_conversion_page' : '/api/create_convert_page';
 
     // Include the model in the data being sent
@@ -82,7 +103,7 @@ const CreateConvertPage: React.FC = () => {
       const newHistoryItem: HistoryItemProps = {
         unit1,
         unit2,
-        prompt,
+        prompt: prompt, // Make sure to use the combined prompt
         model, // Store the model in the history as well, if needed
         pageLink: response.data.file_name,
         timestamp: Date.now(),
@@ -93,6 +114,7 @@ const CreateConvertPage: React.FC = () => {
       setUnit2('');
       setPrompt('');
       setAdditionalContent('');
+      setActiveBubbleId(null); // Reset the active history bubble
       // Reset the model to default if needed, or leave as is if you want to keep the selection
       // setModel('GPT-3.5');
     } catch (error) {
@@ -102,6 +124,11 @@ const CreateConvertPage: React.FC = () => {
     }
   };
 
+  const handleSetActiveBubbleId = (id: string | null) => {
+    // If the id is the same as the active one, it means we are unchecking and want to set to null
+    // Otherwise, we set the active bubble to the one that was just checked
+    setActiveBubbleId(activeBubbleId === id ? null : id);
+  };
 
   const handleClearHistory = async () => {
     setHistory([]);
@@ -173,7 +200,14 @@ const CreateConvertPage: React.FC = () => {
 
       <Box sx={{ marginTop: '20px' }}>
         {history.map(item => (
-          <HistoryBubble key={item.timestamp} {...item} />
+          <HistoryBubble
+            key={item.timestamp}
+            {...item}
+            isActive={activeBubbleId === item.pageLink}
+            setActiveBubbleId={() => handleSetActiveBubbleId(item.pageLink)}
+            onAppendToPrompt={handleAppendToPrompt}
+            applyToPromptDisabled={inputType !== 'prompt'} // Add this line
+          />
         ))}
       </Box>
     </Box>

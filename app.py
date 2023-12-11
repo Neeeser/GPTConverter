@@ -83,7 +83,7 @@ def create_unit_conversion_page():
     unit1 = data.get('unit1')
     unit2 = data.get('unit2')
     model = data.get("model")
-    prompt = unit1 + " to " + unit2 + " conversion make the conversion both ways"
+    prompt = unit1 + " to " + unit2
     print(f"Received prompt: {prompt}")
 
     j = json.load(open("prompt.json"))
