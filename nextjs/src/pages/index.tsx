@@ -16,7 +16,7 @@ import axios from 'axios';
 import HistoryBubble from '../components/HistoryBubble';
 import { HistoryItemProps } from '../types/types'; // Adjust the path as necessary
 
-const API_URL = 'http://localhost:5000'; // Change this to your desired API URL
+const API_URL = 'https://sitegen.cs.vt.edu'; // Change this to your desired API URL
 
 const CreateConvertPage: React.FC = () => {
   const [unit1, setUnit1] = useState('');
@@ -49,7 +49,7 @@ const CreateConvertPage: React.FC = () => {
     fetchModels();
   }, []);
 
-  
+
   useEffect(() => {
     const savedHistory = localStorage.getItem('history');
     if (savedHistory) {
@@ -81,7 +81,7 @@ const CreateConvertPage: React.FC = () => {
     }
   };
 
-  
+
   const handleSubmit = async () => {
     setIsLoading(true);
     let combinedPrompt = prompt;

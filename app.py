@@ -189,10 +189,9 @@ def get_models():
 
 
 if __name__ == '__main__':
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})  # Replace with your React app's serving URL
+    CORS(app, resources={r"/api/*": {"origins": "*"}})  # You can limit origins as needed for security
     load_dotenv()
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    app.run(port=5000)
-
+    app.run(host='0.0.0.0', port=5000)
 

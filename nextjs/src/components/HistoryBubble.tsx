@@ -10,7 +10,7 @@ interface HistoryBubbleProps extends HistoryItemProps {
   isActive: boolean;
   setActiveBubbleId: () => void;
 }
-const API_URL = 'http://localhost:5000'; // Change this to your desired API URL
+const API_URL = 'https://sitegen.cs.vt.edu'; // Change this to your desired API URL
 
 const HistoryBubble: React.FC<HistoryItemProps> = ({
   unit1,
