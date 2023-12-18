@@ -10,6 +10,7 @@ interface HistoryBubbleProps extends HistoryItemProps {
   isActive: boolean;
   setActiveBubbleId: () => void;
 }
+const API_URL = 'http://localhost:5000'; // Change this to your desired API URL
 
 const HistoryBubble: React.FC<HistoryItemProps> = ({
   unit1,
@@ -38,7 +39,7 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
     setAnchorEl(event.currentTarget);
     setEditorOpen(true);
     try {
-      const response = await axios.get(`http://localhost:5000/api/get_file_content/${pageLink}`);
+      const response = await axios.get(`${API_URL}/api/get_file_content/${pageLink}`);
       setFileContent(response.data.content);
     } catch (error) {
       console.error('Error fetching file content', error);
@@ -64,7 +65,7 @@ const HistoryBubble: React.FC<HistoryItemProps> = ({
 
   const handleSave = async () => {
     try {
-      const response = await axios.post(`http://localhost:5000/api/save_file_content/${pageLink}`, { content: fileContent });
+      const response = await axios.post(`${API_URL}/api/save_file_content/${pageLink}`, { content: fileContent });
       alert('File saved successfully');
     } catch (error) {
       console.error('Error saving file', error);

@@ -16,7 +16,7 @@ import axios from 'axios';
 import HistoryBubble from '../components/HistoryBubble';
 import { HistoryItemProps } from '../types/types'; // Adjust the path as necessary
 
-
+const API_URL = 'http://localhost:5000'; // Change this to your desired API URL
 
 const CreateConvertPage: React.FC = () => {
   const [unit1, setUnit1] = useState('');
@@ -34,7 +34,7 @@ const CreateConvertPage: React.FC = () => {
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/get_models');
+        const response = await axios.get(`${API_URL}/api/get_models`);
         setModelOptions(response.data.models);
 
         // Optional: Set the default model if it's in the response
@@ -49,7 +49,7 @@ const CreateConvertPage: React.FC = () => {
     fetchModels();
   }, []);
 
-
+  
   useEffect(() => {
     const savedHistory = localStorage.getItem('history');
     if (savedHistory) {
@@ -73,7 +73,7 @@ const CreateConvertPage: React.FC = () => {
   // Define the getFileContent method in the parent component
   const getFileContent = async (pageLink: string) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/get_file_content/${pageLink}`);
+      const response = await axios.get(`${API_URL}/api/get_file_content/${pageLink}`);
       return response.data.content; // Make sure this corresponds to how your API sends the file content
     } catch (error) {
       console.error('Error fetching file content', error);
@@ -81,7 +81,7 @@ const CreateConvertPage: React.FC = () => {
     }
   };
 
-
+  
   const handleSubmit = async () => {
     setIsLoading(true);
     let combinedPrompt = prompt;
@@ -99,7 +99,7 @@ const CreateConvertPage: React.FC = () => {
     const data = unit1 && unit2 ? { unit1, unit2, model } : { prompt: combinedPrompt, model };
 
     try {
-      const response = await axios.post(`http://localhost:5000${endpoint}`, data);
+      const response = await axios.post(`${API_URL}${endpoint}`, data);
       const newHistoryItem: HistoryItemProps = {
         unit1,
         unit2,
@@ -134,7 +134,7 @@ const CreateConvertPage: React.FC = () => {
     setHistory([]);
     localStorage.removeItem('history');
     try {
-      await axios.post('http://localhost:5000/api/clear_history');
+      await axios.post(`${API_URL}/api/clear_history`);
     } catch (error) {
       console.error('Error clearing the history', error);
     }
