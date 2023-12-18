@@ -145,7 +145,7 @@ def gpt4_request_tsx(prompt):
     """
     # Craft the messages for the chat
     j = json.load(open("prompt.json"))
-    sysprompt = j["RefinedSystemPrompt"]
+    sysprompt = j["RefinedSystemPrompt3.5"]
     print(sysprompt)
     messages = [
         {"role": "system", "content": sysprompt},
